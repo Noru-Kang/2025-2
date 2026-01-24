@@ -1,0 +1,108 @@
+﻿#1
+create table required(
+    dept_name varchar(20) not null,
+    course_id varchar(8) not null,
+    primary key(course_id, dept_name),
+    foreign key(dept_name) references department (dept_name) on delete cascade,
+    foreign key(course_id) references course(course_id) on delete cascade 
+    )
+
+
+#2
+create table advisor_log(
+    s_id varchar(5) not null,
+    i_id varchar(5),
+    advisor_history numeric(4, 0) not null,
+    primary key(s_id, advisor_history),
+    foreign key(s_id) references student(ID) on delete cascade,
+    foreign key(i_id) references instructor(ID) on delete set null
+    )
+
+# 신입생이라 담당교수 없을때를 대비, 학교를 1만일 이상다닐사람 없으니까 처리완료
+
+# 학과만일때
+create table department_log(
+    dept_name varchar(20) not null,
+    building varchar(15),
+    budget numeric(12, 2) check (budget > 0),
+    dept_history numeric(4) not null,
+    primary key(dept_name, dept_history),
+    foreign key(dept_name) references department(dept_name) on delete cascade
+    )
+
+# 학생의 학과일때
+create table s_department_log(
+    s_id varchar(5) not null,
+    dept_name varchar(20),
+    dept_name_history numeric(4) not null,
+    primary key(s_id, dept_name_history),
+    foreign key(s_id) references student(ID) on delete cascade,
+    foreign key(dept_name) references department(dept_name) on delete set null
+    )
+
+# builidng은 null허용(일시적으로 건물이 배정되지 않을 수 있음, 온라인만 열리는 학과라던가)
+# varchar로 id = 0으로 시작
+
+#3
+create table exam(
+    exam_id varchar(8) not null,
+    course_id varchar(8) not null,
+    exam_type varchar(20),
+    number numeric(3) not null check (number > 0),
+    primary key(exam_id),
+    foreign key(course_id) references course(course_id) on delete cascade
+    )
+
+# 따로따로 해야하나
+create table question(
+    exam_id varchar(8) not null,
+    q_id varchar(8) not null,
+    quest varchar(256) not null,
+    primary key(exam_id, q_id),
+    foreign key(exam_id) references exam(exam_id) on delete cascade
+    )
+
+create table answer(
+    exam_id varchar(8) not null,
+    q_id varchar(8) not null,
+    s_id varchar(5) not null,
+    answer varchar(1024),
+    primary key(exam_id, q_id, s_id),
+    foreign key(exam_id, q_id) references question(exam_id, q_id) on delete cascade,
+    foreign key(s_id) references student(ID) on delete cascade
+    );
+
+
+#4
+# flag새워서 해보려고 했는데 방법이 생각이 안남 - 그래서 따로따로 두자
+create table foreigner(
+    f_id varchar(5) not null,
+    primary key(f_id),
+    foreign key(f_id) references student(id) on delete cascade
+);
+
+create table domestic(
+    d_id varchar(5) not null check,
+    primary key(d_id),
+    foreign key(d_id) references student(id) on delete cascade
+);
+
+create table advisor(
+    d_id varchar(5) not null,
+    i_id varchar(5),
+    primary key(d_id),
+    foreign key(d_id) references domestic(d_id) on delete cascade,
+    foreign key(i_id) references instructor(id) on delete cascade
+);
+
+create table takes(
+    id        varchar(5) not null,
+    course_id varchar(8) not null,
+    sec_id    varchar(8) not null,
+    semester  varchar(6) not null,
+    year      numeric(4,0) not null,
+    grade     varchar(2),
+    primary key (id, course_id, sec_id, semester, year),
+    foreign key (id) references student(id) on delete cascade,
+    foreign key (course_id, sec_id, semester, year) references section(course_id, sec_id, semester, year) on delete cascade
+);
